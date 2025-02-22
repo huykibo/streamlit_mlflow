@@ -1,15 +1,14 @@
 import os
 import dagshub
-
+# Cấu hình token mới
+os.environ["MLFLOW_TRACKING_USERNAME"] = "2abbbfb8ec05cd8dc3bdd9f7c98a15b379d7929e"
 # Khởi tạo kết nối với Dagshub; nếu repo của bạn là private, đảm bảo bạn đã cấu hình token qua biến môi trường (hoặc file cấu hình)
 dagshub.init(repo_owner='huykibo', repo_name='mlflow_tracking', mlflow=True)
-
 # Cấu hình lưu trữ artifacts qua S3 của Dagshub
 os.environ["MLFLOW_S3_ENDPOINT_URL"] = "https://dagshub.com/api/v1/repo-buckets/s3/huykibo"
 os.environ["AWS_ACCESS_KEY_ID"] = "a735c443af7a13d25d08634ea3190f2660f8f721"
 os.environ["AWS_SECRET_ACCESS_KEY"] = "a735c443af7a13d25d08634ea3190f2660f8f721"
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
-
 # Các import cho ứng dụng Streamlit và MLflow
 import streamlit as st
 import openml
@@ -26,16 +25,11 @@ from PIL import Image
 import tempfile
 import mlflow
 import streamlit.components.v1 as components
-
 # Cấu hình MLflow sử dụng remote tracking server của Dagshub và xác thực qua API token
 mlflow.set_tracking_uri("https://dagshub.com/huykibo/mlflow_tracking.mlflow")
-os.environ["MLFLOW_TRACKING_USERNAME"] = "a735c443af7a13d25d08634ea3190f2660f8f721"
-# Nếu cần, bạn có thể thiết lập MLFLOW_TRACKING_PASSWORD, nhưng nếu dùng token làm username thì password có thể không cần.
-# os.environ["MLFLOW_TRACKING_PASSWORD"] = "a735c443af7a13d25d08634ea3190f2660f8f721"
 # Cấu hình trang ứng dụng Streamlit
 st.set_page_config(page_title="MNIST App với Streamlit", layout="wide")
 st.title("Ứng dụng Phân loại Chữ số MNIST")
-
 # CSS cho tooltip
 st.markdown("""
     <style>
@@ -72,8 +66,7 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
-
+# Các tab cho ứng dụng
 tabs = st.tabs([
     "Thông tin", 
     "Tải dữ liệu", 
@@ -84,12 +77,10 @@ tabs = st.tabs([
     "Thông tin Huấn luyện"   # Tab này sẽ chứa thêm thông tin MLflow UI
 ])
 tab_info, tab_load, tab_preprocess, tab_split, tab_train_eval, tab_demo, tab_log_info = tabs
-
 # ----------------- TAB 1: THÔNG TIN -----------------
 with tab_info:
     st.header("Thông tin Ứng dụng")
     st.markdown("""
-                
 **Giới thiệu ứng dụng:**
 Ứng dụng **Phân loại Chữ số MNIST với MLflow Tracking trên Dagshub** được thiết kế nhằm mô phỏng quy trình thực tế của một dự án Machine Learning. Ứng dụng này cho phép bạn:
 - **Tải dữ liệu:** Lấy dữ liệu hình ảnh chữ số viết tay từ 0 đến 9 từ nguồn mở như OpenML hoặc upload file CSV tùy chỉnh (yêu cầu file chứa cột 'label').
@@ -108,11 +99,8 @@ with tab_info:
 - **Thông tin Huấn luyện & MLflow UI:** 
   - Hiển thị thông tin chi tiết của quá trình huấn luyện như Run ID, accuracy trên validation và test, cùng với các tham số đã log.
   - Tích hợp nút “Mở MLflow UI” giúp mở giao diện MLflow trực tiếp trên Dagshub, cho phép theo dõi và phân tích quá trình huấn luyện một cách trực quan.
-
 Ứng dụng không chỉ cung cấp giao diện thân thiện cho việc thử nghiệm các mô hình Machine Learning mà còn giúp bạn quản lý và theo dõi toàn bộ quy trình huấn luyện một cách chuyên nghiệp qua MLflow.
 """, unsafe_allow_html=True)
-
-
 # ----------------- TAB 2: TẢI DỮ LIỆU -----------------
 with tab_load:
     st.header("Tải Dữ liệu")
@@ -145,7 +133,6 @@ with tab_load:
                     st.session_state['data'] = (X, y)
                 else:
                     st.error("File upload cần có cột 'label' để làm nhãn.")
-
 # ----------------- TAB 3: XỬ LÍ DỮ LIỆU -----------------
 with tab_preprocess:
     st.header("Xử lí Dữ liệu")
@@ -221,8 +208,6 @@ with tab_preprocess:
                 st.write(st.session_state["data_filled"][0].head())
     else:
         st.info("Vui lòng tải dữ liệu ở thẻ 'Tải Dữ liệu' trước khi xử lí.")
-
-
 # ----------------- TAB 4: CHIA DỮ LIỆU -----------------
 with tab_split:
     st.header("Chia Tách Dữ liệu")
@@ -434,13 +419,11 @@ with tab_train_eval:
                     artifact_path = os.path.join(tmp_dir, "confusion_matrix_val.png")
                     fig.savefig(artifact_path)
                     mlflow.log_artifact(artifact_path, artifact_path="confusion_matrix_val")
-                    
                     # Lưu thông tin log vào session state
                     st.session_state["run_id"] = run_id
                     st.session_state["accuracy_val"] = acc_val
                     st.session_state["accuracy_test"] = acc_test
                     st.session_state["params"] = params
-                    
                     st.success("Huấn luyện mô hình thành công!")
                     st.markdown(f"""
                     <div style="background-color: #cce5ff; padding: 10px; border-radius: 5px;">
@@ -462,8 +445,6 @@ with tab_train_eval:
                     """, unsafe_allow_html=True)
     else:
         st.info("Vui lòng chia tách dữ liệu ở thẻ 'Chia dữ liệu' trước khi huấn luyện mô hình.")
-
-
 # ----------------- TAB 6: DEMO DỰ ĐOÁN -----------------
 with tab_demo:
     st.header("Demo Dự đoán")
@@ -571,7 +552,6 @@ with tab_demo:
                     del st.session_state["prediction"]
                 st.success("Đã xóa kết quả dự đoán.")
                 st.stop()
-
 # ----------------- TAB 7: THÔNG TIN HUẤN LUYỆN & MLflow UI -----------------
 with tab_log_info:
     st.header("Thông tin Huấn luyện")
@@ -584,7 +564,6 @@ with tab_log_info:
         st.json(st.session_state["params"])
     else:
         st.info("Chưa có thông tin nào được log. Vui lòng huấn luyện mô hình trước.")
-
     st.markdown("---")
     if st.button("Mở MLflow UI"):
         mlflow_url = "https://dagshub.com/huykibo/mlflow_tracking.mlflow"
