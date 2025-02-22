@@ -1,15 +1,6 @@
 import os
 import dagshub
-# Cấu hình token mới
-os.environ["MLFLOW_TRACKING_USERNAME"] = "2abbbfb8ec05cd8dc3bdd9f7c98a15b379d7929e"
-# Khởi tạo kết nối với Dagshub; nếu repo của bạn là private, đảm bảo bạn đã cấu hình token qua biến môi trường (hoặc file cấu hình)
-dagshub.init(repo_owner='huykibo', repo_name='mlflow_tracking', mlflow=True)
-# Cấu hình lưu trữ artifacts qua S3 của Dagshub
-os.environ["MLFLOW_S3_ENDPOINT_URL"] = "https://dagshub.com/api/v1/repo-buckets/s3/huykibo"
-os.environ["AWS_ACCESS_KEY_ID"] = "a735c443af7a13d25d08634ea3190f2660f8f721"
-os.environ["AWS_SECRET_ACCESS_KEY"] = "a735c443af7a13d25d08634ea3190f2660f8f721"
-os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
-# Các import cho ứng dụng Streamlit và MLflow
+import mlflow
 import streamlit as st
 import openml
 import pandas as pd
@@ -23,10 +14,15 @@ import seaborn as sns
 from sklearn.impute import SimpleImputer
 from PIL import Image
 import tempfile
-import mlflow
-import streamlit.components.v1 as components
-# Cấu hình MLflow sử dụng remote tracking server của Dagshub và xác thực qua API token
-mlflow.set_tracking_uri("https://dagshub.com/huykibo/mlflow_tracking.mlflow")
+# Cấu hình thông tin xác thực và kết nối với DagsHub
+os.environ["MLFLOW_TRACKING_USERNAME"] = "huykibo"  # Thay thế bằng tên người dùng của bạn
+os.environ["MLFLOW_TRACKING_PASSWORD"] = "bc46eb50e9f4cdf9c81339d3e6b9d7fd45012047"  # Thay thế bằng token của bạn
+# Khởi tạo kết nối với Dagshub
+dagshub.init(repo_owner='huykibo', repo_name='streamlit_mlflow', mlflow=True)
+# Cấu hình URI để theo dõi MLflow
+mlflow.set_tracking_uri("https://dagshub.com/huykibo/streamlit_mlflow.mlflow")
+# Thiết lập experiment mới
+mlflow.set_experiment("MNIST")
 # Cấu hình trang ứng dụng Streamlit
 st.set_page_config(page_title="MNIST App với Streamlit", layout="wide")
 st.title("Ứng dụng Phân loại Chữ số MNIST")
@@ -50,10 +46,10 @@ st.markdown("""
       padding: 8px;
       position: absolute;
       z-index: 1;
-      top: 50%;
-      left: 105%;
-      transform: translateY(-50%);
-      margin-left: 8px;
+      top: 100%;  /* Đặt tooltip bên dưới */
+      left: 50%;
+      transform: translateX(-50%);  /* Căn giữa tooltip */
+      margin-top: 5px;  /* Khoảng cách giữa tooltip và phần tử */
       opacity: 0;
       transition: opacity 0.3s;
       border: 1px solid #ccc;
@@ -74,7 +70,7 @@ tabs = st.tabs([
     "Chia dữ liệu", 
     "Huấn luyện/Đánh giá", 
     "Demo dự đoán", 
-    "Thông tin Huấn luyện"   # Tab này sẽ chứa thêm thông tin MLflow UI
+    "Thông tin Huấn luyện"
 ])
 tab_info, tab_load, tab_preprocess, tab_split, tab_train_eval, tab_demo, tab_log_info = tabs
 # ----------------- TAB 1: THÔNG TIN -----------------
@@ -143,6 +139,7 @@ with tab_preprocess:
         st.subheader("Dữ liệu Gốc")
         st.write(X.head())
         st.markdown("### Các thao tác xử lí dữ liệu")
+        
         # --- Normalization ---
         with st.container():
             col_norm_btn, col_norm_tip = st.columns([0.95, 0.05])
@@ -164,6 +161,7 @@ with tab_preprocess:
             if "data_norm" in st.session_state:
                 st.write("**Kết quả Chuẩn hoá:**")
                 st.write(st.session_state["data_norm"][0].head())
+        
         # --- Standardization ---
         with st.container():
             col_std_btn, col_std_tip = st.columns([0.95, 0.05])
@@ -185,6 +183,7 @@ with tab_preprocess:
             if "data_std" in st.session_state:
                 st.write("**Kết quả Standardization:**")
                 st.write(st.session_state["data_std"][0].head())
+        
         # --- Missing Imputation ---
         with st.container():
             col_imp_btn, col_imp_tip = st.columns([0.95, 0.05])
@@ -218,6 +217,7 @@ with tab_split:
         valid_pct = st.slider("Validation set (%)", min_value=0, max_value=50, value=15)
         test_pct = st.slider("Test set (%)", min_value=0, max_value=50, value=15)
         train_pct = 100 - (valid_pct + test_pct)
+        
         if train_pct < 0:
             st.warning("Tổng % Validation + Test vượt quá 100%. Hãy điều chỉnh lại.")
         else:
@@ -227,6 +227,7 @@ with tab_split:
             st.write(f"**Tập huấn luyện**: {train_samples} mẫu ({train_pct}%)")
             st.write(f"**Tập validation**: {valid_samples} mẫu ({valid_pct}%)")
             st.write(f"**Tập kiểm tra**: {test_samples} mẫu ({test_pct}%)")
+        
         if st.button("Chia dữ liệu"):
             if train_pct < 0:
                 st.error("Không thể chia dữ liệu vì tổng % Validation + Test vượt quá 100%.")
@@ -264,6 +265,7 @@ with tab_train_eval:
                     </span>
                 </div>
                 """, unsafe_allow_html=True)
+        
         params = {}
         if model_choice == "Decision Tree":
             st.subheader("Tham số cho Decision Tree")
@@ -373,6 +375,7 @@ with tab_train_eval:
                 y_train = split_data["y_train"]
                 X_valid = split_data["X_valid"]
                 y_valid = split_data["y_valid"]
+                
                 # Kiểm tra missing values, nếu có, áp dụng imputation
                 if pd.isnull(X_train).sum().sum() > 0:
                     st.warning("Dữ liệu huấn luyện chứa missing values. Áp dụng imputation (median)...")
@@ -385,13 +388,8 @@ with tab_train_eval:
                 if model_choice == "Decision Tree":
                     model = DecisionTreeClassifier(**params)
                 else:
-                    if params["gamma"] not in ["scale", "auto"]:
-                        try:
-                            params["gamma"] = float(params["gamma"])
-                        except:
-                            st.warning("Giá trị gamma không hợp lệ, mặc định='scale'.")
-                            params["gamma"] = "scale"
                     model = SVC(probability=True, **params)
+                # Bắt đầu một run mới trong experiment "MNIST"
                 with mlflow.start_run() as run:
                     run_id = run.info.run_id
                     model.fit(X_train, y_train)
@@ -566,5 +564,5 @@ with tab_log_info:
         st.info("Chưa có thông tin nào được log. Vui lòng huấn luyện mô hình trước.")
     st.markdown("---")
     if st.button("Mở MLflow UI"):
-        mlflow_url = "https://dagshub.com/huykibo/mlflow_tracking.mlflow"
+        mlflow_url = "https://dagshub.com/huykibo/streamlit_mlflow.mlflow/#/experiments/0?searchFilter=&orderByKey=attributes.start_time&orderByAsc=false&startTime=ALL&lifecycleFilter=Active&modelVersionFilter=All+Runs&datasetsFilter=W10%3D"
         st.markdown(f'**[Click vào đây để mở MLflow UI]({mlflow_url})**')
