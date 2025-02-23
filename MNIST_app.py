@@ -362,7 +362,7 @@ with tab_train_eval:
                 params["C"] = st.number_input("C (Regularization parameter)", min_value=0.01, max_value=100.0, value=1.0, step=0.01)
             with col_C_tooltip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-top:40px;>
+                    <div class="tooltip" style="margin-top:40px;">
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Tham số điều chỉnh mức phạt cho lỗi. Giá trị cao: phân chia dữ liệu chặt chẽ (có thể gây overfitting), giá trị thấp: tạo biên phân cách rộng hơn.
@@ -375,7 +375,7 @@ with tab_train_eval:
                 params["kernel"] = st.selectbox("kernel", ["linear", "rbf", "poly", "sigmoid"])
             with col_kernel_tooltip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-top:40px;>
+                    <div class="tooltip" style="margin-top:40px;">
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Chọn hàm nhân để chuyển đổi dữ liệu:
@@ -396,7 +396,7 @@ with tab_train_eval:
                 params["gamma"] = st.text_input("gamma (mặc định='scale')", value="scale")
             with col_gamma_tooltip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-top:40px;> 
+                    <div class="tooltip" style="margin-top:40px;"> 
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Hệ số cho kernel, xác định mức độ ảnh hưởng của từng mẫu. Mặc định là 'scale'; có thể điều chỉnh để tối ưu hóa hiệu năng.
@@ -410,7 +410,7 @@ with tab_train_eval:
                     params["degree"] = st.number_input("degree (cho kernel poly)", min_value=1, max_value=10, value=3)
                 with col_degree_tooltip:
                     st.markdown("""
-                        <div class="tooltip">
+                        <div class="tooltip" style="margin-top:40px;">
                             <span>?</span>
                             <span class="tooltiptext" style="margin-left:20px;">
                                 Độ bậc của hàm đa thức khi sử dụng kernel poly, xác định độ phức tạp của mối quan hệ phi tuyến.
