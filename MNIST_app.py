@@ -15,11 +15,9 @@ from PIL import Image
 import tempfile
 
 # ========== PHẦN QUAN TRỌNG: LẤY THÔNG TIN TỪ STREAMLIT SECRETS ==========
-# Sử dụng thông tin trong phần secrets (đặt trong section [mlflow])
 os.environ["MLFLOW_TRACKING_USERNAME"] = st.secrets["mlflow"]["MLFLOW_TRACKING_USERNAME"]
 os.environ["MLFLOW_TRACKING_PASSWORD"] = st.secrets["mlflow"]["MLFLOW_TRACKING_PASSWORD"]
 
-# Thiết lập tracking URI cho MLflow (trỏ đến DagsHub)
 mlflow.set_tracking_uri(st.secrets["mlflow"]["MLFLOW_TRACKING_URI"])
 mlflow.set_experiment("MNIST")
 
@@ -81,7 +79,8 @@ with tab_info:
     st.header("Thông tin Ứng dụng")
     st.markdown("""
 **Giới thiệu ứng dụng:**
-Ứng dụng **Phân loại Chữ số MNIST với MLflow Tracking trên DagsHub** mô phỏng quy trình của một dự án Machine Learning. Ứng dụng cho phép bạn:
+Ứng dụng **Phân loại Chữ số MNIST với MLflow Tracking trên DagsHub** mô phỏng quy trình của một dự án Machine Learning. 
+Các chức năng chính gồm:
 - **Tải dữ liệu:** Lấy dữ liệu MNIST từ OpenML hoặc upload file CSV (có cột 'label').
 - **Xử lí dữ liệu:** Thực hiện normalization, standardization và missing imputation.
 - **Chia dữ liệu:** Phân chia dữ liệu thành tập huấn luyện, validation, test.
@@ -97,7 +96,7 @@ with tab_load:
         <div class="tooltip">
             <span style="font-weight:bold;">OpenML?</span>
             <span class="tooltiptext">
-                OpenML là nền tảng mở cho Machine Learning, cung cấp nhiều dataset.
+                OpenML là nền tảng mở cho Machine Learning, cung cấp nhiều dataset chất lượng để huấn luyện mô hình.
             </span>
         </div>
         """, unsafe_allow_html=True)
@@ -132,15 +131,6 @@ with tab_preprocess:
             st.session_state["data_original"] = (X, y)
         st.subheader("Dữ liệu Gốc")
         st.write(X.head())
-        
-        # Thêm mô tả chi tiết về các thao tác xử lí dữ liệu
-        st.markdown("""
-#### Giải thích các thao tác xử lí dữ liệu:
-- **Normalization:** Chuyển đổi giá trị pixel từ khoảng [0, 255] sang [0, 1] bằng cách chia cho 255. Điều này giúp chuẩn hóa dữ liệu đầu vào, làm cho các đặc trưng có cùng thang đo và hỗ trợ quá trình huấn luyện mô hình hiệu quả hơn.
-- **Standardization:** Điều chỉnh dữ liệu sao cho có trung bình = 0 và độ lệch chuẩn = 1. Phương pháp này giúp xử lý các đặc trưng với quy mô khác nhau và thường giúp mô hình hội tụ nhanh hơn.
-- **Missing Imputation:** Điền giá trị bị thiếu trong dữ liệu bằng trung vị của từng cột. Việc này giúp duy trì tính toàn vẹn của dữ liệu và tránh ảnh hưởng tiêu cực của các giá trị thiếu trong quá trình huấn luyện.
-        """, unsafe_allow_html=True)
-        
         st.markdown("### Các thao tác xử lí dữ liệu")
         
         # Normalization
@@ -157,7 +147,7 @@ with tab_preprocess:
                     <div class="tooltip" style="margin-left:-880px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Chia giá trị pixel cho 255 để chuyển từ [0, 255] về [0, 1].
+                            Chia giá trị pixel cho 255 để chuyển từ [0, 255] về [0, 1], giúp chuẩn hóa dữ liệu đầu vào cho mô hình.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -179,7 +169,7 @@ with tab_preprocess:
                     <div class="tooltip" style="margin-left:-880px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Chuyển dữ liệu sao cho trung bình = 0 và độ lệch chuẩn = 1.
+                            Chuyển dữ liệu sao cho trung bình = 0 và độ lệch chuẩn = 1, giúp cho quá trình huấn luyện mô hình hiệu quả hơn.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -201,7 +191,7 @@ with tab_preprocess:
                     <div class="tooltip" style="margin-left:-880px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Thay thế các giá trị thiếu bằng trung vị của từng cột.
+                            Thay thế các giá trị thiếu trong dữ liệu bằng trung vị của từng cột, giúp tránh lỗi khi huấn luyện.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -274,6 +264,7 @@ with tab_train_eval:
         params = {}
         if model_choice == "Decision Tree":
             st.subheader("Tham số cho Decision Tree")
+            # Tooltip cho criterion với mô tả chi tiết
             col_crit, col_crit_tooltip = st.columns([0.9, 0.9])
             with col_crit:
                 params["criterion"] = st.selectbox("criterion", ["gini", "entropy", "log_loss"])
@@ -282,10 +273,14 @@ with tab_train_eval:
                     <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Chọn hàm đánh giá độ tinh khiết (gini, entropy, log_loss).
+                            Chọn hàm đánh giá độ tinh khiết:
+                            - <strong>gini</strong>: Dựa trên chỉ số Gini, phổ biến và tính toán nhanh.
+                            - <strong>entropy</strong>: Dựa trên entropy, đo lường sự hỗn loạn trong nút.
+                            - <strong>log_loss</strong>: Sử dụng log loss, phù hợp với một số bài toán đặc thù.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
+            # Tooltip cho max_depth
             col_depth, col_depth_tooltip = st.columns([0.9, 0.9])
             with col_depth:
                 params["max_depth"] = st.number_input("max_depth", min_value=1, max_value=100, value=10)
@@ -294,10 +289,11 @@ with tab_train_eval:
                     <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Giới hạn độ sâu của cây.
+                            Giới hạn độ sâu của cây để tránh overfitting. Giá trị thấp giúp mô hình đơn giản, cao cho phép mô hình phức tạp hơn.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
+            # Tooltip cho min_samples_split
             col_split, col_split_tooltip = st.columns([0.9, 0.9])
             with col_split:
                 params["min_samples_split"] = st.number_input("min_samples_split", min_value=2, max_value=50, value=5)
@@ -306,23 +302,13 @@ with tab_train_eval:
                     <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Số mẫu tối thiểu để chia tách nút.
+                            Số mẫu tối thiểu cần thiết để chia tách một nút. Giá trị cao hơn giúp hạn chế overfitting bằng cách yêu cầu nhiều mẫu hơn trước khi chia.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
-            
-            # Thêm mô tả chi tiết cho các tham số của Decision Tree
-            st.markdown("""
-**Chi tiết tham số cho Decision Tree:**
-- **criterion:** Xác định hàm đánh giá độ tinh khiết của nút. Các lựa chọn:
-  - *gini*: Dựa trên chỉ số Gini, phổ biến và hiệu quả.
-  - *entropy*: Dựa trên entropy, đo lường độ hỗn loạn của nút.
-  - *log_loss*: Sử dụng log loss để đánh giá.
-- **max_depth:** Giới hạn độ sâu của cây, giúp ngăn chặn việc cây trở nên quá phức tạp (overfitting).
-- **min_samples_split:** Số mẫu tối thiểu cần có để phân chia một nút, giúp kiểm soát kích thước của các nút và hạn chế overfitting.
-            """, unsafe_allow_html=True)
         else:
             st.subheader("Tham số cho SVM")
+            # Tooltip cho tham số C
             col_C, col_C_tooltip = st.columns([0.9, 0.9])
             with col_C:
                 params["C"] = st.number_input("C (Regularization parameter)", min_value=0.01, max_value=100.0, value=1.0, step=0.01)
@@ -331,10 +317,11 @@ with tab_train_eval:
                     <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Tham số điều chỉnh mức độ phạt cho lỗi.
+                            Tham số điều chỉnh mức phạt cho lỗi. Giá trị cao: phân chia dữ liệu chặt chẽ (có thể gây overfitting), giá trị thấp: tạo biên phân cách rộng hơn.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
+            # Tooltip cho kernel
             col_kernel, col_kernel_tooltip = st.columns([0.9, 0.9])
             with col_kernel:
                 params["kernel"] = st.selectbox("kernel", ["linear", "rbf", "poly", "sigmoid"])
@@ -343,10 +330,15 @@ with tab_train_eval:
                     <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Chọn hàm nhân (linear, rbf, poly, sigmoid).
+                            Chọn hàm nhân để chuyển đổi dữ liệu:
+                            - <strong>linear</strong>: Tuyến tính.
+                            - <strong>rbf</strong>: Radial Basis Function, hiệu quả với dữ liệu phi tuyến.
+                            - <strong>poly</strong>: Đa thức (yêu cầu chỉ định degree).
+                            - <strong>sigmoid</strong>: Hàm sigmoid, tương tự hàm kích hoạt trong mạng nơ-ron.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
+            # Tooltip cho gamma
             col_gamma, col_gamma_tooltip = st.columns([0.9, 0.9])
             with col_gamma:
                 params["gamma"] = st.text_input("gamma (mặc định='scale')", value="scale")
@@ -355,11 +347,12 @@ with tab_train_eval:
                     <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Hệ số cho kernel, mặc định 'scale'.
+                            Hệ số cho kernel, xác định mức độ ảnh hưởng của từng mẫu. Mặc định là 'scale'; có thể điều chỉnh để tối ưu hóa hiệu năng.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
             if params["kernel"] == "poly":
+                # Tooltip cho degree khi kernel là poly
                 col_degree, col_degree_tooltip = st.columns([0.9, 0.9])
                 with col_degree:
                     params["degree"] = st.number_input("degree (cho kernel poly)", min_value=1, max_value=10, value=3)
@@ -368,23 +361,10 @@ with tab_train_eval:
                         <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                             <span>?</span>
                             <span class="tooltiptext">
-                                Độ bậc của hàm đa thức (poly).
+                                Độ bậc của hàm đa thức khi sử dụng kernel poly, xác định độ phức tạp của mối quan hệ phi tuyến.
                             </span>
                         </div>
                         """, unsafe_allow_html=True)
-            
-            # Thêm mô tả chi tiết cho các tham số của SVM
-            st.markdown("""
-**Chi tiết tham số cho SVM:**
-- **C (Regularization parameter):** Điều chỉnh mức phạt cho lỗi. Giá trị cao sẽ cố gắng phân chia dữ liệu chính xác hơn nhưng dễ gây overfitting; giá trị thấp giúp tạo biên phân cách rộng.
-- **kernel:** Hàm nhân dùng để chuyển đổi dữ liệu sang không gian có thể phân chia tuyến tính. Các lựa chọn:
-  - *linear*: Hàm nhân tuyến tính.
-  - *rbf*: Hàm nhân Radial Basis Function, hiệu quả với dữ liệu phi tuyến.
-  - *poly*: Hàm nhân đa thức, cho phép mô hình hóa các quan hệ phi tuyến.
-  - *sigmoid*: Hàm nhân sigmoid, tương tự như hàm kích hoạt trong mạng nơ-ron.
-- **gamma:** Hệ số của kernel, xác định mức độ ảnh hưởng của từng điểm dữ liệu. Mặc định là 'scale'.
-- **degree (cho kernel poly):** Độ bậc của hàm đa thức khi sử dụng kernel poly, quyết định độ phức tạp của mối quan hệ phi tuyến.
-            """, unsafe_allow_html=True)
         
         if st.button("Huấn luyện mô hình"):
             with st.spinner("Đang huấn luyện mô hình..."):
@@ -457,9 +437,7 @@ with tab_train_eval:
                     
                     st.session_state["trained_model"] = model
                     st.pyplot(fig)
-                    st.write("""
-                    Biểu đồ Confusion Matrix hiển thị số dự đoán đúng và sai.
-                    """, unsafe_allow_html=True)
+                    st.write("Biểu đồ Confusion Matrix hiển thị số dự đoán đúng và sai.")
     else:
         st.info("Vui lòng chia tách dữ liệu ở thẻ 'Chia dữ liệu' trước khi huấn luyện mô hình.")
 
