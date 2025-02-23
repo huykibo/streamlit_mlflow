@@ -315,7 +315,7 @@ with tab_train_eval:
                 params["criterion"] = st.selectbox("criterion", ["gini", "entropy", "log_loss"])
             with col_crit_tooltip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-top:40px;">
+                    <div class="tooltip" style="margin-top:38px;">
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Chọn hàm đánh giá độ tinh khiết:
