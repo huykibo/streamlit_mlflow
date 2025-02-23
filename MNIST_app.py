@@ -299,7 +299,7 @@ with tab_train_eval:
             st.markdown("""
                 <div class="tooltip">
                     <span>?</span>
-                    <span class="tooltiptext" style="margin-left:20px;" mstyle=" margin-top=20px">
+                    <span class="tooltiptext" style="margin-left:20px;" mstyle=" margin-top=220px">
                         <strong>Decision Tree:</strong> Phân lớp dữ liệu theo cấu trúc cây.<br>
                         <strong>SVM:</strong> Tìm biên phân chia tối ưu dựa trên siêu phẳng.
                     </span>
