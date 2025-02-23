@@ -79,7 +79,7 @@ with tab_info:
     st.header("Thông tin Ứng dụng")
     st.markdown("""
 **Giới thiệu ứng dụng:**
-Ứng dụng **Phân loại Chữ số MNIST mô phỏng quy trình của một dự án Machine Learning.  
+Ứng dụng Phân loại Chữ số MNIST mô phỏng quy trình của một dự án Machine Learning.  
 Ứng dụng được chia thành các phần chính sau:
 
 - **Tải dữ liệu:**  
@@ -474,6 +474,18 @@ with tab_train_eval:
                     fig.savefig(artifact_path)
                     mlflow.log_artifact(artifact_path, artifact_path="confusion_matrix_val")
                     
+                    # Log Confusion Matrix (Test) - PHẦN THÊM VÀO
+                    cm_test = confusion_matrix(y_test, y_pred_test)
+                    fig_test, ax_test = plt.subplots()
+                    sns.heatmap(cm_test, annot=True, fmt='d', cmap="Greens", ax=ax_test)
+                    ax_test.set_title("Confusion Matrix (Test)")
+                    ax_test.set_xlabel("Dự đoán")
+                    ax_test.set_ylabel("Thực tế")
+                    tmp_dir_test = tempfile.mkdtemp()
+                    artifact_path_test = os.path.join(tmp_dir_test, "confusion_matrix_test.png")
+                    fig_test.savefig(artifact_path_test)
+                    mlflow.log_artifact(artifact_path_test, artifact_path="confusion_matrix_test")
+                    
                     st.session_state["run_id"] = run_id
                     st.session_state["accuracy_val"] = acc_val
                     st.session_state["accuracy_test"] = acc_test
@@ -489,9 +501,14 @@ with tab_train_eval:
                     
                     st.session_state["trained_model"] = model
                     st.pyplot(fig)
-                    st.write("Biểu đồ Confusion Matrix hiển thị số dự đoán đúng và sai.")
+                    st.write("Biểu đồ Confusion Matrix (Validation) hiển thị số dự đoán đúng và sai.")
+                    
+                    # Hiển thị biểu đồ Confusion Matrix cho tập Test
+                    st.pyplot(fig_test)
+                    st.write("Biểu đồ Confusion Matrix cho tập Test hiển thị số dự đoán đúng và sai.")
     else:
         st.info("Vui lòng chia tách dữ liệu ở thẻ 'Chia dữ liệu' trước khi huấn luyện mô hình.")
+
 
 # ----------------- TAB 6: DEMO DỰ ĐOÁN -----------------
 with tab_demo:
