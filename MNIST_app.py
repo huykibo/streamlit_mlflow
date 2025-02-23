@@ -297,9 +297,9 @@ with tab_train_eval:
             model_choice = st.selectbox("Chọn mô hình", ["Decision Tree", "SVM"])
         with col_model_tooltip:
             st.markdown("""
-                <div class="tooltip">
+                <div class="tooltip"  style="margin-top:50px;">
                     <span>?</span>
-                    <span class="tooltiptext" style="margin-left:20px;" mstyle=" margin-top=220px">
+                    <span class="tooltiptext" style="margin-left:20px;">
                         <strong>Decision Tree:</strong> Phân lớp dữ liệu theo cấu trúc cây.<br>
                         <strong>SVM:</strong> Tìm biên phân chia tối ưu dựa trên siêu phẳng.
                     </span>
