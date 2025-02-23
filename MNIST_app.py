@@ -25,7 +25,7 @@ mlflow.set_experiment("MNIST")
 st.set_page_config(page_title="MNIST App với Streamlit", layout="wide")
 st.title("Ứng dụng Phân loại Chữ số MNIST")
 
-# CSS cho tooltip (không thay đổi)
+# CSS cho tooltip: cập nhật hiển thị bên phải dấu chấm hỏi
 st.markdown("""
     <style>
     .tooltip {
@@ -45,10 +45,10 @@ st.markdown("""
       padding: 8px;
       position: absolute;
       z-index: 1;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      margin-top: 5px;
+      left: 105%;  /* Hiển thị bên phải */
+      top: 50%;
+      transform: translateY(-50%);
+      margin-top: 0;
       opacity: 0;
       transition: opacity 0.3s;
       border: 1px solid #ccc;
@@ -144,7 +144,7 @@ with tab_preprocess:
                         st.success("Đã chuẩn hoá dữ liệu!")
             with col_norm_tip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-left:-880px;">
+                    <div class="tooltip">
                         <span>?</span>
                         <span class="tooltiptext">
                             Chia giá trị pixel cho 255 để chuyển từ [0, 255] về [0, 1], giúp chuẩn hóa dữ liệu đầu vào cho mô hình.
@@ -166,7 +166,7 @@ with tab_preprocess:
                         st.success("Đã thực hiện Standardization!")
             with col_std_tip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-left:-880px;">
+                    <div class="tooltip">
                         <span>?</span>
                         <span class="tooltiptext">
                             Chuyển dữ liệu sao cho trung bình = 0 và độ lệch chuẩn = 1, giúp cho quá trình huấn luyện mô hình hiệu quả hơn.
@@ -188,7 +188,7 @@ with tab_preprocess:
                         st.success("Đã điền giá trị missing!")
             with col_imp_tip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-left:-880px;">
+                    <div class="tooltip">
                         <span>?</span>
                         <span class="tooltiptext">
                             Thay thế các giá trị thiếu trong dữ liệu bằng trung vị của từng cột, giúp tránh lỗi khi huấn luyện.
@@ -252,7 +252,7 @@ with tab_train_eval:
             model_choice = st.selectbox("Chọn mô hình", ["Decision Tree", "SVM"])
         with col_model_tooltip:
             st.markdown("""
-                <div class="tooltip" style="margin-top:10px;">
+                <div class="tooltip">
                     <span>?</span>
                     <span class="tooltiptext">
                         <strong>Decision Tree:</strong> Phân lớp dữ liệu theo cấu trúc cây.<br>
@@ -270,7 +270,7 @@ with tab_train_eval:
                 params["criterion"] = st.selectbox("criterion", ["gini", "entropy", "log_loss"])
             with col_crit_tooltip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-top:10px; margin-left:20px;">
+                    <div class="tooltip">
                         <span>?</span>
                         <span class="tooltiptext">
                             Chọn hàm đánh giá độ tinh khiết:
@@ -286,7 +286,7 @@ with tab_train_eval:
                 params["max_depth"] = st.number_input("max_depth", min_value=1, max_value=100, value=10)
             with col_depth_tooltip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-top:10px; margin-left:20px;">
+                    <div class="tooltip">
                         <span>?</span>
                         <span class="tooltiptext">
                             Giới hạn độ sâu của cây để tránh overfitting. Giá trị thấp giúp mô hình đơn giản, cao cho phép mô hình phức tạp hơn.
@@ -299,7 +299,7 @@ with tab_train_eval:
                 params["min_samples_split"] = st.number_input("min_samples_split", min_value=2, max_value=50, value=5)
             with col_split_tooltip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-top:10px; margin-left:20px;">
+                    <div class="tooltip">
                         <span>?</span>
                         <span class="tooltiptext">
                             Số mẫu tối thiểu cần thiết để chia tách một nút. Giá trị cao hơn giúp hạn chế overfitting bằng cách yêu cầu nhiều mẫu hơn trước khi chia.
@@ -314,7 +314,7 @@ with tab_train_eval:
                 params["C"] = st.number_input("C (Regularization parameter)", min_value=0.01, max_value=100.0, value=1.0, step=0.01)
             with col_C_tooltip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-top:10px; margin-left:20px;">
+                    <div class="tooltip">
                         <span>?</span>
                         <span class="tooltiptext">
                             Tham số điều chỉnh mức phạt cho lỗi. Giá trị cao: phân chia dữ liệu chặt chẽ (có thể gây overfitting), giá trị thấp: tạo biên phân cách rộng hơn.
@@ -327,7 +327,7 @@ with tab_train_eval:
                 params["kernel"] = st.selectbox("kernel", ["linear", "rbf", "poly", "sigmoid"])
             with col_kernel_tooltip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-top:10px; margin-left:20px;">
+                    <div class="tooltip">
                         <span>?</span>
                         <span class="tooltiptext">
                             Chọn hàm nhân để chuyển đổi dữ liệu:
@@ -344,7 +344,7 @@ with tab_train_eval:
                 params["gamma"] = st.text_input("gamma (mặc định='scale')", value="scale")
             with col_gamma_tooltip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-top:10px; margin-left:20px;">
+                    <div class="tooltip">
                         <span>?</span>
                         <span class="tooltiptext">
                             Hệ số cho kernel, xác định mức độ ảnh hưởng của từng mẫu. Mặc định là 'scale'; có thể điều chỉnh để tối ưu hóa hiệu năng.
@@ -358,7 +358,7 @@ with tab_train_eval:
                     params["degree"] = st.number_input("degree (cho kernel poly)", min_value=1, max_value=10, value=3)
                 with col_degree_tooltip:
                     st.markdown("""
-                        <div class="tooltip" style="margin-top:10px; margin-left:20px;">
+                        <div class="tooltip">
                             <span>?</span>
                             <span class="tooltiptext">
                                 Độ bậc của hàm đa thức khi sử dụng kernel poly, xác định độ phức tạp của mối quan hệ phi tuyến.
