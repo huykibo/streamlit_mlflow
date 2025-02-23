@@ -305,8 +305,11 @@ with tab_train_eval:
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Chọn hàm đánh giá độ tinh khiết:
+
                             - <strong>gini</strong>: Dựa trên chỉ số Gini, phổ biến và tính toán nhanh.
+
                             - <strong>entropy</strong>: Dựa trên entropy, đo lường sự hỗn loạn trong nút.
+
                             - <strong>log_loss</strong>: Sử dụng log loss, phù hợp với một số bài toán đặc thù.
                         </span>
                     </div>
@@ -362,9 +365,13 @@ with tab_train_eval:
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Chọn hàm nhân để chuyển đổi dữ liệu:
+
                             - <strong>linear</strong>: Tuyến tính.
+
                             - <strong>rbf</strong>: Radial Basis Function, hiệu quả với dữ liệu phi tuyến.
+
                             - <strong>poly</strong>: Đa thức (yêu cầu chỉ định degree).
+                            
                             - <strong>sigmoid</strong>: Hàm sigmoid, tương tự hàm kích hoạt trong mạng nơ-ron.
                         </span>
                     </div>
