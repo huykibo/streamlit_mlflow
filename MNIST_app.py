@@ -315,7 +315,7 @@ with tab_train_eval:
                 params["criterion"] = st.selectbox("criterion", ["gini", "entropy", "log_loss"])
             with col_crit_tooltip:
                 st.markdown("""
-                    <div class="tooltip"  style="margin-top:40px;>
+                    <div class="tooltip" style="margin-top:40px;">
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Chọn hàm đánh giá độ tinh khiết:
@@ -334,7 +334,7 @@ with tab_train_eval:
                 params["max_depth"] = st.number_input("max_depth", min_value=1, max_value=100, value=10)
             with col_depth_tooltip:
                 st.markdown("""
-                    <div class="tooltip"  style="margin-top:40px;>
+                    <div class="tooltip" style="margin-top:40px;">
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Giới hạn độ sâu của cây để tránh overfitting. Giá trị thấp giúp mô hình đơn giản, cao cho phép mô hình phức tạp hơn.
