@@ -334,7 +334,7 @@ with tab_train_eval:
                 params["max_depth"] = st.number_input("max_depth", min_value=1, max_value=100, value=10)
             with col_depth_tooltip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-top:40px;">
+                    <div class="tooltip" style="margin-top:36px;">
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Giới hạn độ sâu của cây để tránh overfitting. Giá trị thấp giúp mô hình đơn giản, cao cho phép mô hình phức tạp hơn.
@@ -347,7 +347,7 @@ with tab_train_eval:
                 params["min_samples_split"] = st.number_input("min_samples_split", min_value=2, max_value=50, value=5)
             with col_split_tooltip:
                 st.markdown("""
-                    <div class="tooltip">
+                    <div class="tooltip" style="margin-top:40px;">
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Số mẫu tối thiểu cần thiết để chia tách một nút. Giá trị cao hơn giúp hạn chế overfitting bằng cách yêu cầu nhiều mẫu hơn trước khi chia.
