@@ -117,6 +117,15 @@ with tab_info:
 # ----------------- TAB 2: TẢI DỮ LIỆU -----------------
 with tab_load:
     st.header("Tải Dữ liệu")
+    
+    # Lưu ý về định dạng dữ liệu cần tải lên
+    st.markdown("""
+    **Lưu ý:**  
+    - Ứng dụng chỉ sử dụng dữ liệu ảnh dạng **28x28 pixel (grayscale)**  
+    - Dữ liệu phải có cột **'label'** chứa nhãn (số từ 0 đến 9)  
+    Nếu dữ liệu của bạn không theo định dạng này, vui lòng sử dụng dữ liệu MNIST từ OpenML.
+    """)
+    
     st.markdown("""
         <div class="tooltip">
             <span style="font-weight:bold;">OpenML?</span>
@@ -125,6 +134,7 @@ with tab_load:
             </span>
         </div>
         """, unsafe_allow_html=True)
+    
     data_option = st.radio("Chọn nguồn dữ liệu:", ("Tải từ OpenML", "Upload dữ liệu"))
     if data_option == "Tải từ OpenML":
         if st.button("Tải dữ liệu MNIST từ OpenML"):
@@ -146,6 +156,7 @@ with tab_load:
                     st.session_state['data'] = (X, y)
                 else:
                     st.error("File cần có cột 'label'.")
+
 
 # ----------------- TAB 3: XỬ LÍ DỮ LIỆU -----------------
 with tab_preprocess:
@@ -305,11 +316,9 @@ with tab_train_eval:
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Chọn hàm đánh giá độ tinh khiết:
-
+                            <br>
                             - <strong>gini</strong>: Dựa trên chỉ số Gini, phổ biến và tính toán nhanh.
-
                             - <strong>entropy</strong>: Dựa trên entropy, đo lường sự hỗn loạn trong nút.
-
                             - <strong>log_loss</strong>: Sử dụng log loss, phù hợp với một số bài toán đặc thù.
                         </span>
                     </div>
@@ -365,13 +374,9 @@ with tab_train_eval:
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Chọn hàm nhân để chuyển đổi dữ liệu:
-
                             - <strong>linear</strong>: Tuyến tính.
-
                             - <strong>rbf</strong>: Radial Basis Function, hiệu quả với dữ liệu phi tuyến.
-
                             - <strong>poly</strong>: Đa thức (yêu cầu chỉ định degree).
-                            
                             - <strong>sigmoid</strong>: Hàm sigmoid, tương tự hàm kích hoạt trong mạng nơ-ron.
                         </span>
                     </div>
