@@ -5,7 +5,7 @@ import openml
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, f1_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC  # Dùng SVC cho SVM
 import matplotlib.pyplot as plt
@@ -102,16 +102,19 @@ with tab_info:
   - **Decision Trees:**  
     Xây dựng cây quyết định với các tham số như *criterion*, *max_depth*, và *min_samples_split* để phân lớp dữ liệu.
   - **SVM (Support Vector Machines):**  
-    Sử dụng SVM với các tham số như *C*, *kernel*, *gamma* và (nếu dùng kernel poly) *degree* để tìm biên phân chia tối ưu.
-  
-  Sau khi huấn luyện, ứng dụng sẽ hiển thị các chỉ số accuracy trên tập validation và test, cùng với biểu đồ confusion matrix để đánh giá hiệu quả của mô hình.  
-  Các thông số và kết quả được log thông qua MLflow, giúp theo dõi và phân tích hiệu suất mô hình.
+    Sử dụng SVM với các tham số như *C*, *kernel*, *gamma* và (nếu dùng kernel poly) *degree* để tìm biên phân chia tối ưu.  
+  Sau khi huấn luyện, ứng dụng hiển thị chỉ số Accuracy cùng với biểu đồ Confusion Matrix và các chỉ số Precision, Recall và F1-Score được tính từ tập validation.  
+  Các chỉ số này giúp đánh giá toàn diện hơn về hiệu năng của mô hình:
+    - **Precision:** Tỉ lệ dự đoán dương tính đúng trên tổng số dự đoán dương tính.
+    - **Recall:** Tỉ lệ mẫu dương tính được dự đoán đúng trên tổng số mẫu dương tính thực tế.
+    - **F1-Score:** Trung bình điều hòa của Precision và Recall, thể hiện sự cân bằng giữa chúng.
+  Các thông số và kết quả được log thông qua MLflow.
 
 - **Demo dự đoán:**  
   Cho phép người dùng chọn mẫu từ tập Test hoặc upload ảnh mới để dự đoán và kiểm tra kết quả của mô hình.
 
 - **Thông tin Huấn luyện:**  
-  Hiển thị thông tin chi tiết của các run huấn luyện, bao gồm Run ID, các tham số đã sử dụng, và accuracy trên các tập dữ liệu. Người dùng có thể mở giao diện MLflow để xem thêm chi tiết.
+  Hiển thị thông tin chi tiết của các run huấn luyện, bao gồm Run ID, các tham số đã sử dụng, và các chỉ số accuracy. Người dùng có thể mở giao diện MLflow để xem thêm chi tiết.
 """, unsafe_allow_html=True)
 
 # ----------------- TAB 2: TẢI DỮ LIỆU -----------------
@@ -169,7 +172,7 @@ with tab_preprocess:
                         st.success("Đã chuẩn hoá dữ liệu!")
             with col_norm_tip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-left:-860px;">
+                    <div class="tooltip" style="margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
                             Normalization (Chuẩn hoá):  
@@ -193,7 +196,7 @@ with tab_preprocess:
                         st.success("Đã thực hiện Standardization!")
             with col_std_tip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-left:-860px;">
+                    <div class="tooltip" style="margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
                             Standardization:  
@@ -217,7 +220,7 @@ with tab_preprocess:
                         st.success("Đã điền giá trị missing!")
             with col_imp_tip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-left:-860px;">
+                    <div class="tooltip" style="margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
                             Missing Imputation (Điền giá trị Missing):  
@@ -428,7 +431,16 @@ with tab_train_eval:
                     # Đánh giá trên tập Validation
                     y_pred_val = model.predict(X_valid)
                     acc_val = accuracy_score(y_valid, y_pred_val)
+                    
+                    # Tính các chỉ số bổ sung
+                    precision = precision_score(y_valid, y_pred_val, average='weighted')
+                    recall = recall_score(y_valid, y_pred_val, average='weighted')
+                    f1 = f1_score(y_valid, y_pred_val, average='weighted')
+                    
                     mlflow.log_metric("val_accuracy", acc_val)
+                    mlflow.log_metric("val_precision", precision)
+                    mlflow.log_metric("val_recall", recall)
+                    mlflow.log_metric("val_f1_score", f1)
                     
                     # Đánh giá trên tập Test
                     X_test = split_data["X_test"]
@@ -448,6 +460,17 @@ with tab_train_eval:
                     ax.set_title("Confusion Matrix (Validation)")
                     ax.set_xlabel("Dự đoán")
                     ax.set_ylabel("Thực tế")
+                    
+                    # Annotate thêm các chỉ số Precision, Recall, F1-Score trên biểu đồ
+                    textstr = '\n'.join((
+                        f'Precision: {precision:.4f}',
+                        f'Recall: {recall:.4f}',
+                        f'F1-Score: {f1:.4f}'
+                    ))
+                    props = dict(boxstyle='round', facecolor='white', alpha=0.8)
+                    ax.text(1.05, 0.5, textstr, transform=ax.transAxes, fontsize=10,
+                            verticalalignment='center', bbox=props)
+                    
                     tmp_dir = tempfile.mkdtemp()
                     artifact_path = os.path.join(tmp_dir, "confusion_matrix_val.png")
                     fig.savefig(artifact_path)
@@ -463,12 +486,21 @@ with tab_train_eval:
                     <div style="background-color: #cce5ff; padding: 10px; border-radius: 5px;">
                         <strong>Accuracy trên validation:</strong> {acc_val:.4f}<br>
                         <strong>Accuracy trên test:</strong> {acc_test:.4f}<br>
+                        <strong>Precision:</strong> {precision:.4f}<br>
+                        <strong>Recall:</strong> {recall:.4f}<br>
+                        <strong>F1-Score:</strong> {f1:.4f}<br>
                     </div>
                     """, unsafe_allow_html=True)
                     
                     st.session_state["trained_model"] = model
                     st.pyplot(fig)
-                    st.write("Biểu đồ Confusion Matrix hiển thị số dự đoán đúng và sai.")
+                    st.markdown("""
+                        **Giải thích các chỉ số:**
+                        - **Precision:** Tỉ lệ dự đoán dương tính đúng trên tổng số dự đoán dương tính.
+                        - **Recall:** Tỉ lệ mẫu dương tính được dự đoán đúng trên tổng số mẫu dương tính thực tế.
+                        - **F1-Score:** Trung bình điều hòa của Precision và Recall, cho biết mức độ cân bằng giữa chúng.
+                    """, unsafe_allow_html=True)
+                    st.write("Biểu đồ Confusion Matrix hiển thị số dự đoán đúng và sai cùng với các chỉ số Precision, Recall và F1-Score được tính từ tập Validation.")
     else:
         st.info("Vui lòng chia tách dữ liệu ở thẻ 'Chia dữ liệu' trước khi huấn luyện mô hình.")
 
