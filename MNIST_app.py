@@ -14,18 +14,22 @@ import seaborn as sns
 from sklearn.impute import SimpleImputer
 from PIL import Image
 import tempfile
-# Cấu hình thông tin xác thực và kết nối với DagsHub
-os.environ["MLFLOW_TRACKING_USERNAME"] = "huykibo"  # Thay thế bằng tên người dùng của bạn
-os.environ["MLFLOW_TRACKING_PASSWORD"] = "bc46eb50e9f4cdf9c81339d3e6b9d7fd45012047"  # Thay thế bằng token của bạn
-# Khởi tạo kết nối với Dagshub
+
+# ========== PHẦN QUAN TRỌNG: LẤY THÔNG TIN TỪ STREAMLIT SECRETS ==========
+# Giả sử bạn dùng section [mlflow] trong secrets.toml
+os.environ["MLFLOW_TRACKING_USERNAME"] = st.secrets["mlflow"]["MLFLOW_TRACKING_USERNAME"]
+os.environ["MLFLOW_TRACKING_PASSWORD"] = st.secrets["mlflow"]["MLFLOW_TRACKING_PASSWORD"]
+mlflow.set_tracking_uri(st.secrets["mlflow"]["MLFLOW_TRACKING_URI"])
+
+# Khởi tạo kết nối với DagsHub
 dagshub.init(repo_owner='huykibo', repo_name='streamlit_mlflow', mlflow=True)
-# Cấu hình URI để theo dõi MLflow
-mlflow.set_tracking_uri("https://dagshub.com/huykibo/streamlit_mlflow.mlflow")
-# Thiết lập experiment mới
+# Thiết lập experiment
 mlflow.set_experiment("MNIST")
-# Cấu hình trang ứng dụng Streamlit
+
+# ========== CẤU HÌNH STREAMLIT ==========
 st.set_page_config(page_title="MNIST App với Streamlit", layout="wide")
 st.title("Ứng dụng Phân loại Chữ số MNIST")
+
 # CSS cho tooltip
 st.markdown("""
     <style>
@@ -46,10 +50,10 @@ st.markdown("""
       padding: 8px;
       position: absolute;
       z-index: 1;
-      top: 100%;  /* Đặt tooltip bên dưới */
+      top: 100%;
       left: 50%;
-      transform: translateX(-50%);  /* Căn giữa tooltip */
-      margin-top: 5px;  /* Khoảng cách giữa tooltip và phần tử */
+      transform: translateX(-50%);
+      margin-top: 5px;
       opacity: 0;
       transition: opacity 0.3s;
       border: 1px solid #ccc;
@@ -62,17 +66,19 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-# Các tab cho ứng dụng
+
+# Tạo các tab
 tabs = st.tabs([
-    "Thông tin", 
-    "Tải dữ liệu", 
-    "Xử lí dữ liệu", 
-    "Chia dữ liệu", 
-    "Huấn luyện/Đánh giá", 
-    "Demo dự đoán", 
+    "Thông tin",
+    "Tải dữ liệu",
+    "Xử lí dữ liệu",
+    "Chia dữ liệu",
+    "Huấn luyện/Đánh giá",
+    "Demo dự đoán",
     "Thông tin Huấn luyện"
 ])
 tab_info, tab_load, tab_preprocess, tab_split, tab_train_eval, tab_demo, tab_log_info = tabs
+
 # ----------------- TAB 1: THÔNG TIN -----------------
 with tab_info:
     st.header("Thông tin Ứng dụng")
@@ -95,8 +101,8 @@ with tab_info:
 - **Thông tin Huấn luyện & MLflow UI:** 
   - Hiển thị thông tin chi tiết của quá trình huấn luyện như Run ID, accuracy trên validation và test, cùng với các tham số đã log.
   - Tích hợp nút “Mở MLflow UI” giúp mở giao diện MLflow trực tiếp trên Dagshub, cho phép theo dõi và phân tích quá trình huấn luyện một cách trực quan.
-Ứng dụng không chỉ cung cấp giao diện thân thiện cho việc thử nghiệm các mô hình Machine Learning mà còn giúp bạn quản lý và theo dõi toàn bộ quy trình huấn luyện một cách chuyên nghiệp qua MLflow.
 """, unsafe_allow_html=True)
+
 # ----------------- TAB 2: TẢI DỮ LIỆU -----------------
 with tab_load:
     st.header("Tải Dữ liệu")
@@ -129,6 +135,7 @@ with tab_load:
                     st.session_state['data'] = (X, y)
                 else:
                     st.error("File upload cần có cột 'label' để làm nhãn.")
+
 # ----------------- TAB 3: XỬ LÍ DỮ LIỆU -----------------
 with tab_preprocess:
     st.header("Xử lí Dữ liệu")
@@ -140,7 +147,7 @@ with tab_preprocess:
         st.write(X.head())
         st.markdown("### Các thao tác xử lí dữ liệu")
         
-        # --- Normalization ---
+        # Normalization
         with st.container():
             col_norm_btn, col_norm_tip = st.columns([0.95, 0.05])
             with col_norm_btn:
@@ -162,7 +169,7 @@ with tab_preprocess:
                 st.write("**Kết quả Chuẩn hoá:**")
                 st.write(st.session_state["data_norm"][0].head())
         
-        # --- Standardization ---
+        # Standardization
         with st.container():
             col_std_btn, col_std_tip = st.columns([0.95, 0.05])
             with col_std_btn:
@@ -184,7 +191,7 @@ with tab_preprocess:
                 st.write("**Kết quả Standardization:**")
                 st.write(st.session_state["data_std"][0].head())
         
-        # --- Missing Imputation ---
+        # Missing Imputation
         with st.container():
             col_imp_btn, col_imp_tip = st.columns([0.95, 0.05])
             with col_imp_btn:
@@ -207,6 +214,7 @@ with tab_preprocess:
                 st.write(st.session_state["data_filled"][0].head())
     else:
         st.info("Vui lòng tải dữ liệu ở thẻ 'Tải Dữ liệu' trước khi xử lí.")
+
 # ----------------- TAB 4: CHIA DỮ LIỆU -----------------
 with tab_split:
     st.header("Chia Tách Dữ liệu")
@@ -247,9 +255,10 @@ with tab_split:
                     st.write(f"Số mẫu Test: {X_test.shape[0]}")
     else:
         st.info("Vui lòng tải và xử lí dữ liệu ở các thẻ trước.")
+
 # ----------------- TAB 5: HUẤN LUYỆN/ĐÁNH GIÁ MÔ HÌNH -----------------
 with tab_train_eval:
-    st.header("Huấn luyện và Đánh giá Mô hình")
+    st.header("Huấn luyện và Đánh Giá Mô Hình")
     if 'split_data' in st.session_state:
         split_data = st.session_state['split_data']
         col_model, col_model_tooltip = st.columns([0.9, 0.9])
@@ -269,7 +278,6 @@ with tab_train_eval:
         params = {}
         if model_choice == "Decision Tree":
             st.subheader("Tham số cho Decision Tree")
-            # Tham số criterion
             col_crit, col_crit_tooltip = st.columns([0.9, 0.9])
             with col_crit:
                 params["criterion"] = st.selectbox("criterion", ["gini", "entropy", "log_loss"])
@@ -283,7 +291,6 @@ with tab_train_eval:
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
-            # Tham số max_depth
             col_depth, col_depth_tooltip = st.columns([0.9, 0.9])
             with col_depth:
                 params["max_depth"] = st.number_input("max_depth", min_value=1, max_value=100, value=10)
@@ -296,7 +303,6 @@ with tab_train_eval:
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
-            # Tham số min_samples_split
             col_split, col_split_tooltip = st.columns([0.9, 0.9])
             with col_split:
                 params["min_samples_split"] = st.number_input("min_samples_split", min_value=2, max_value=50, value=5)
@@ -312,7 +318,6 @@ with tab_train_eval:
                     """, unsafe_allow_html=True)
         else:
             st.subheader("Tham số cho SVM")
-            # Tham số C
             col_C, col_C_tooltip = st.columns([0.9, 0.9])
             with col_C:
                 params["C"] = st.number_input("C (Regularization parameter)", min_value=0.01, max_value=100.0, value=1.0, step=0.01)
@@ -326,7 +331,6 @@ with tab_train_eval:
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
-            # Tham số kernel
             col_kernel, col_kernel_tooltip = st.columns([0.9, 0.9])
             with col_kernel:
                 params["kernel"] = st.selectbox("kernel", ["linear", "rbf", "poly", "sigmoid"])
@@ -341,7 +345,6 @@ with tab_train_eval:
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
-            # Tham số gamma
             col_gamma, col_gamma_tooltip = st.columns([0.9, 0.9])
             with col_gamma:
                 params["gamma"] = st.text_input("gamma (mặc định='scale')", value="scale")
@@ -355,7 +358,6 @@ with tab_train_eval:
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
-            # Nếu kernel là poly, thêm tham số degree
             if params["kernel"] == "poly":
                 col_degree, col_degree_tooltip = st.columns([0.9, 0.9])
                 with col_degree:
@@ -369,6 +371,7 @@ with tab_train_eval:
                             </span>
                         </div>
                         """, unsafe_allow_html=True)
+        
         if st.button("Huấn luyện mô hình"):
             with st.spinner("Đang huấn luyện mô hình..."):
                 X_train = split_data["X_train"]
@@ -376,7 +379,7 @@ with tab_train_eval:
                 X_valid = split_data["X_valid"]
                 y_valid = split_data["y_valid"]
                 
-                # Kiểm tra missing values, nếu có, áp dụng imputation
+                # Kiểm tra missing values
                 if pd.isnull(X_train).sum().sum() > 0:
                     st.warning("Dữ liệu huấn luyện chứa missing values. Áp dụng imputation (median)...")
                     imputer = SimpleImputer(strategy='median')
@@ -385,28 +388,36 @@ with tab_train_eval:
                     split_data["X_test"] = imputer.transform(split_data["X_test"])
                     st.session_state["imputer"] = imputer
                     st.session_state['split_data'] = split_data
+                
+                # Tạo model
                 if model_choice == "Decision Tree":
                     model = DecisionTreeClassifier(**params)
                 else:
                     model = SVC(probability=True, **params)
-                # Bắt đầu một run mới trong experiment "MNIST"
+                
+                # Bắt đầu 1 run MLflow
                 with mlflow.start_run() as run:
                     run_id = run.info.run_id
                     model.fit(X_train, y_train)
+                    
                     # Đánh giá trên tập Validation
                     y_pred_val = model.predict(X_valid)
                     acc_val = accuracy_score(y_valid, y_pred_val)
                     mlflow.log_metric("val_accuracy", acc_val)
+                    
                     # Đánh giá trên tập Test
                     X_test = split_data["X_test"]
                     y_test = split_data["y_test"]
                     y_pred_test = model.predict(X_test)
                     acc_test = accuracy_score(y_test, y_pred_test)
                     mlflow.log_metric("test_accuracy", acc_test)
+                    
+                    # Log tham số
                     mlflow.log_param("model_choice", model_choice)
                     for key, value in params.items():
                         mlflow.log_param(key, value)
-                    # Log artifact: Biểu đồ Confusion Matrix cho tập Validation
+                    
+                    # Log Confusion Matrix (Validation)
                     cm_val = confusion_matrix(y_valid, y_pred_val)
                     fig, ax = plt.subplots()
                     sns.heatmap(cm_val, annot=True, fmt='d', cmap="Blues", ax=ax)
@@ -417,20 +428,23 @@ with tab_train_eval:
                     artifact_path = os.path.join(tmp_dir, "confusion_matrix_val.png")
                     fig.savefig(artifact_path)
                     mlflow.log_artifact(artifact_path, artifact_path="confusion_matrix_val")
-                    # Lưu thông tin log vào session state
+                    
+                    # Lưu thông tin vào session_state
                     st.session_state["run_id"] = run_id
                     st.session_state["accuracy_val"] = acc_val
                     st.session_state["accuracy_test"] = acc_test
                     st.session_state["params"] = params
+                    
                     st.success("Huấn luyện mô hình thành công!")
                     st.markdown(f"""
                     <div style="background-color: #cce5ff; padding: 10px; border-radius: 5px;">
-                        <strong>Accuracy trên validation:</strong> {acc_val:.4f} 
+                        <strong>Accuracy trên validation:</strong> {acc_val:.4f}
                         <br>
                         <strong>Accuracy trên test:</strong> {acc_test:.4f}
                         <br>
                     </div>
                     """, unsafe_allow_html=True)
+                    
                     st.session_state["trained_model"] = model
                     st.pyplot(fig)
                     st.write("""
@@ -443,6 +457,7 @@ with tab_train_eval:
                     """, unsafe_allow_html=True)
     else:
         st.info("Vui lòng chia tách dữ liệu ở thẻ 'Chia dữ liệu' trước khi huấn luyện mô hình.")
+
 # ----------------- TAB 6: DEMO DỰ ĐOÁN -----------------
 with tab_demo:
     st.header("Demo Dự đoán")
@@ -544,12 +559,13 @@ with tab_demo:
                                 confidence = np.max(probs)
                                 st.write("Độ tin cậy:", confidence)
                         else:
-                            st.warning("Vui lòng huấn luyện mô hình ở thẻ 'Huấn luyện/Đánh giá' trước.")
+                            st.warning("Vui lòng huấn luyện mô hình ở thẻ 'Huấn luyện/Đánh Giá' trước.")
             if st.button("Xóa dự đoán", key="btn_clear_upload"):
                 if "prediction" in st.session_state:
                     del st.session_state["prediction"]
                 st.success("Đã xóa kết quả dự đoán.")
                 st.stop()
+
 # ----------------- TAB 7: THÔNG TIN HUẤN LUYỆN & MLflow UI -----------------
 with tab_log_info:
     st.header("Thông tin Huấn luyện")
