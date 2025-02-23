@@ -1,5 +1,4 @@
 import os
-import dagshub
 import mlflow
 import streamlit as st
 import openml
@@ -16,14 +15,12 @@ from PIL import Image
 import tempfile
 
 # ========== PHẦN QUAN TRỌNG: LẤY THÔNG TIN TỪ STREAMLIT SECRETS ==========
-# Giả sử bạn dùng section [mlflow] trong secrets.toml
+# Sử dụng thông tin trong phần secrets (đặt trong section [mlflow])
 os.environ["MLFLOW_TRACKING_USERNAME"] = st.secrets["mlflow"]["MLFLOW_TRACKING_USERNAME"]
 os.environ["MLFLOW_TRACKING_PASSWORD"] = st.secrets["mlflow"]["MLFLOW_TRACKING_PASSWORD"]
-mlflow.set_tracking_uri(st.secrets["mlflow"]["MLFLOW_TRACKING_URI"])
 
-# Khởi tạo kết nối với DagsHub
-dagshub.init(repo_owner='huykibo', repo_name='streamlit_mlflow', mlflow=True)
-# Thiết lập experiment
+# Thiết lập tracking URI cho MLflow (trỏ đến DagsHub)
+mlflow.set_tracking_uri(st.secrets["mlflow"]["MLFLOW_TRACKING_URI"])
 mlflow.set_experiment("MNIST")
 
 # ========== CẤU HÌNH STREAMLIT ==========
@@ -67,7 +64,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Tạo các tab
+# Tạo các tab cho ứng dụng
 tabs = st.tabs([
     "Thông tin",
     "Tải dữ liệu",
@@ -84,23 +81,13 @@ with tab_info:
     st.header("Thông tin Ứng dụng")
     st.markdown("""
 **Giới thiệu ứng dụng:**
-Ứng dụng **Phân loại Chữ số MNIST với MLflow Tracking trên Dagshub** được thiết kế nhằm mô phỏng quy trình thực tế của một dự án Machine Learning. Ứng dụng này cho phép bạn:
-- **Tải dữ liệu:** Lấy dữ liệu hình ảnh chữ số viết tay từ 0 đến 9 từ nguồn mở như OpenML hoặc upload file CSV tùy chỉnh (yêu cầu file chứa cột 'label').
-- **Xử lí dữ liệu:** Áp dụng các bước tiền xử lý quan trọng bao gồm:
-  - **Normalization:** Chia giá trị pixel cho 255 để chuẩn hóa dữ liệu về khoảng [0, 1].
-  - **Standardization:** Trừ đi giá trị trung bình và chia cho độ lệch chuẩn của từng đặc trưng.
-  - **Missing Imputation:** Thay thế các giá trị thiếu bằng trung vị của từng cột.
-- **Chia dữ liệu:** Phân chia dữ liệu thành các tập huấn luyện, validation và test theo tỷ lệ phần trăm do người dùng chỉ định, đảm bảo quá trình huấn luyện và đánh giá mô hình được thực hiện hiệu quả.
-- **Huấn luyện & Đánh giá:** 
-  - Cho phép lựa chọn mô hình phân loại (Decision Tree hoặc SVM) và tùy chỉnh các tham số tương ứng.
-  - Huấn luyện mô hình trên tập dữ liệu đã chia, sau đó đánh giá hiệu năng qua các chỉ số accuracy trên tập validation và test.
-  - Tự động log các tham số, chỉ số (metrics) và artifact (như biểu đồ Confusion Matrix) thông qua MLflow.
-- **Demo dự đoán:** 
-  - Dự đoán mẫu từ tập Test với chế độ chọn ngẫu nhiên hoặc thủ công.
-  - Hoặc upload ảnh mới để thực hiện dự đoán, hiển thị kết quả cùng độ tin cậy.
-- **Thông tin Huấn luyện & MLflow UI:** 
-  - Hiển thị thông tin chi tiết của quá trình huấn luyện như Run ID, accuracy trên validation và test, cùng với các tham số đã log.
-  - Tích hợp nút “Mở MLflow UI” giúp mở giao diện MLflow trực tiếp trên Dagshub, cho phép theo dõi và phân tích quá trình huấn luyện một cách trực quan.
+Ứng dụng **Phân loại Chữ số MNIST với MLflow Tracking trên DagsHub** mô phỏng quy trình của một dự án Machine Learning. Ứng dụng cho phép bạn:
+- **Tải dữ liệu:** Lấy dữ liệu MNIST từ OpenML hoặc upload file CSV (có cột 'label').
+- **Xử lí dữ liệu:** Thực hiện normalization, standardization và missing imputation.
+- **Chia dữ liệu:** Phân chia dữ liệu thành tập huấn luyện, validation, test.
+- **Huấn luyện & Đánh giá:** Huấn luyện mô hình (Decision Tree hoặc SVM) và log các thông số qua MLflow.
+- **Demo dự đoán:** Dự đoán mẫu từ tập Test hoặc upload ảnh mới.
+- **Thông tin Huấn luyện:** Xem thông tin run và mở giao diện MLflow trên DagsHub.
 """, unsafe_allow_html=True)
 
 # ----------------- TAB 2: TẢI DỮ LIỆU -----------------
@@ -134,7 +121,7 @@ with tab_load:
                     y = data["label"]
                     st.session_state['data'] = (X, y)
                 else:
-                    st.error("File upload cần có cột 'label' để làm nhãn.")
+                    st.error("File cần có cột 'label'.")
 
 # ----------------- TAB 3: XỬ LÍ DỮ LIỆU -----------------
 with tab_preprocess:
@@ -161,7 +148,7 @@ with tab_preprocess:
                     <div class="tooltip" style="margin-left:-880px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Chuẩn hóa dữ liệu bằng cách chia giá trị pixel cho 255. Việc này chuyển đổi dữ liệu từ khoảng [0, 255] về [0, 1], giúp giảm sự chênh lệch giữa các giá trị pixel và cải thiện hiệu quả huấn luyện mô hình.
+                            Chia giá trị pixel cho 255 để chuyển từ [0, 255] về [0, 1].
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -183,7 +170,7 @@ with tab_preprocess:
                     <div class="tooltip" style="margin-left:-880px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Standardization chuyển đổi dữ liệu sao cho các đặc trưng có phân phối với trung bình 0 và độ lệch chuẩn 1. Điều này giúp cân bằng dữ liệu khi các đặc trưng có phạm vi giá trị khác nhau, từ đó cải thiện hiệu suất của các thuật toán Machine Learning.
+                            Chuyển dữ liệu sao cho trung bình = 0 và độ lệch chuẩn = 1.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -205,7 +192,7 @@ with tab_preprocess:
                     <div class="tooltip" style="margin-left:-880px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Missing Imputation thay thế các giá trị thiếu trong dữ liệu bằng giá trị trung vị của từng cột. Phương pháp này giúp duy trì tính toàn vẹn của dữ liệu và tránh sai số trong quá trình huấn luyện mô hình.
+                            Thay thế các giá trị thiếu bằng trung vị của từng cột.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -269,7 +256,7 @@ with tab_train_eval:
                 <div class="tooltip" style="margin-top:10px;">
                     <span>?</span>
                     <span class="tooltiptext">
-                        <strong>Decision Tree:</strong> Sử dụng cấu trúc cây để phân lớp dữ liệu.<br>
+                        <strong>Decision Tree:</strong> Phân lớp dữ liệu theo cấu trúc cây.<br>
                         <strong>SVM:</strong> Tìm biên phân chia tối ưu dựa trên siêu phẳng.
                     </span>
                 </div>
@@ -286,8 +273,7 @@ with tab_train_eval:
                     <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            <strong>criterion:</strong> Hàm đánh giá độ tinh khiết của nút. 
-                            Lựa chọn này đo lường sự "tinh khiết" của nút dựa trên phân bố của các lớp (gini, entropy, log_loss).
+                            Chọn hàm đánh giá độ tinh khiết (gini, entropy, log_loss).
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -299,7 +285,7 @@ with tab_train_eval:
                     <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            <strong>max_depth:</strong> Giới hạn độ sâu của cây. Giá trị này kiểm soát số lượng mức phân tách tối đa, giúp tránh hiện tượng overfitting.
+                            Giới hạn độ sâu của cây.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -311,8 +297,7 @@ with tab_train_eval:
                     <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            <strong>min_samples_split:</strong> Số mẫu tối thiểu cần có tại một nút để tiến hành chia tách. 
-                            Điều này giúp kiểm soát sự phức tạp của cây.
+                            Số mẫu tối thiểu để chia tách nút.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -326,8 +311,7 @@ with tab_train_eval:
                     <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            <strong>C:</strong> Tham số điều chỉnh mức độ phạt cho lỗi. 
-                            Giá trị nhỏ giúp mô hình đơn giản hơn (có thể underfit), trong khi giá trị lớn có thể làm mô hình phức tạp và dễ overfit.
+                            Tham số điều chỉnh mức độ phạt cho lỗi.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -339,9 +323,7 @@ with tab_train_eval:
                     <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            <strong>kernel:</strong> Hàm nhân chuyển đổi dữ liệu. 
-                            Nó chuyển đổi dữ liệu sang không gian cao chiều để tìm được biên phân chia tuyến tính. 
-                            Ví dụ: linear, rbf, poly, sigmoid.
+                            Chọn hàm nhân (linear, rbf, poly, sigmoid).
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -353,8 +335,7 @@ with tab_train_eval:
                     <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            <strong>gamma:</strong> Hệ số cho kernel. 'scale' là mặc định, được tính dựa trên số đặc trưng của dữ liệu. 
-                            Giá trị gamma cao có thể dẫn đến overfitting.
+                            Hệ số cho kernel, mặc định 'scale'.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -367,7 +348,7 @@ with tab_train_eval:
                         <div class="tooltip" style="margin-top:10px; margin-left:20px;">
                             <span>?</span>
                             <span class="tooltiptext">
-                                <strong>degree:</strong> Độ bậc của hàm đa thức, xác định mức độ phi tuyến của biên phân lớp với kernel poly.
+                                Độ bậc của hàm đa thức (poly).
                             </span>
                         </div>
                         """, unsafe_allow_html=True)
@@ -379,7 +360,7 @@ with tab_train_eval:
                 X_valid = split_data["X_valid"]
                 y_valid = split_data["y_valid"]
                 
-                # Kiểm tra missing values
+                # Kiểm tra missing values và áp dụng imputation nếu cần
                 if pd.isnull(X_train).sum().sum() > 0:
                     st.warning("Dữ liệu huấn luyện chứa missing values. Áp dụng imputation (median)...")
                     imputer = SimpleImputer(strategy='median')
@@ -412,7 +393,6 @@ with tab_train_eval:
                     acc_test = accuracy_score(y_test, y_pred_test)
                     mlflow.log_metric("test_accuracy", acc_test)
                     
-                    # Log tham số
                     mlflow.log_param("model_choice", model_choice)
                     for key, value in params.items():
                         mlflow.log_param(key, value)
@@ -429,7 +409,6 @@ with tab_train_eval:
                     fig.savefig(artifact_path)
                     mlflow.log_artifact(artifact_path, artifact_path="confusion_matrix_val")
                     
-                    # Lưu thông tin vào session_state
                     st.session_state["run_id"] = run_id
                     st.session_state["accuracy_val"] = acc_val
                     st.session_state["accuracy_test"] = acc_test
@@ -438,22 +417,15 @@ with tab_train_eval:
                     st.success("Huấn luyện mô hình thành công!")
                     st.markdown(f"""
                     <div style="background-color: #cce5ff; padding: 10px; border-radius: 5px;">
-                        <strong>Accuracy trên validation:</strong> {acc_val:.4f}
-                        <br>
-                        <strong>Accuracy trên test:</strong> {acc_test:.4f}
-                        <br>
+                        <strong>Accuracy trên validation:</strong> {acc_val:.4f}<br>
+                        <strong>Accuracy trên test:</strong> {acc_test:.4f}<br>
                     </div>
                     """, unsafe_allow_html=True)
                     
                     st.session_state["trained_model"] = model
                     st.pyplot(fig)
                     st.write("""
-                    Biểu đồ Confusion Matrix hiển thị số lượng dự đoán đúng và sai:
-                    <ul>
-                      <li><strong>Các ô trên đường chéo:</strong> Số dự đoán đúng (mô hình hoạt động tốt).</li>
-                      <li><strong>Các ô ngoài đường chéo:</strong> Số dự đoán sai.</li>
-                    </ul>
-                    Nếu các giá trị trên đường chéo chiếm đa số, mô hình đang dự đoán khá chính xác.
+                    Biểu đồ Confusion Matrix hiển thị số dự đoán đúng và sai.
                     """, unsafe_allow_html=True)
     else:
         st.info("Vui lòng chia tách dữ liệu ở thẻ 'Chia dữ liệu' trước khi huấn luyện mô hình.")
@@ -580,5 +552,5 @@ with tab_log_info:
         st.info("Chưa có thông tin nào được log. Vui lòng huấn luyện mô hình trước.")
     st.markdown("---")
     if st.button("Mở MLflow UI"):
-        mlflow_url = "https://dagshub.com/huykibo/streamlit_mlflow.mlflow/#/experiments/0?searchFilter=&orderByKey=attributes.start_time&orderByAsc=false&startTime=ALL&lifecycleFilter=Active&modelVersionFilter=All+Runs&datasetsFilter=W10%3D"
+        mlflow_url = "https://dagshub.com/huykibo/streamlit_mlflow.mlflow/#/experiments/0"
         st.markdown(f'**[Click vào đây để mở MLflow UI]({mlflow_url})**')
