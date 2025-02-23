@@ -27,7 +27,7 @@ mlflow.set_experiment("MNIST")
 st.set_page_config(page_title="MNIST App với Streamlit", layout="wide")
 st.title("Ứng dụng Phân loại Chữ số MNIST")
 
-# CSS cho tooltip
+# CSS cho tooltip (không thay đổi)
 st.markdown("""
     <style>
     .tooltip {
@@ -132,6 +132,15 @@ with tab_preprocess:
             st.session_state["data_original"] = (X, y)
         st.subheader("Dữ liệu Gốc")
         st.write(X.head())
+        
+        # Thêm mô tả chi tiết về các thao tác xử lí dữ liệu
+        st.markdown("""
+#### Giải thích các thao tác xử lí dữ liệu:
+- **Normalization:** Chuyển đổi giá trị pixel từ khoảng [0, 255] sang [0, 1] bằng cách chia cho 255. Điều này giúp chuẩn hóa dữ liệu đầu vào, làm cho các đặc trưng có cùng thang đo và hỗ trợ quá trình huấn luyện mô hình hiệu quả hơn.
+- **Standardization:** Điều chỉnh dữ liệu sao cho có trung bình = 0 và độ lệch chuẩn = 1. Phương pháp này giúp xử lý các đặc trưng với quy mô khác nhau và thường giúp mô hình hội tụ nhanh hơn.
+- **Missing Imputation:** Điền giá trị bị thiếu trong dữ liệu bằng trung vị của từng cột. Việc này giúp duy trì tính toàn vẹn của dữ liệu và tránh ảnh hưởng tiêu cực của các giá trị thiếu trong quá trình huấn luyện.
+        """, unsafe_allow_html=True)
+        
         st.markdown("### Các thao tác xử lí dữ liệu")
         
         # Normalization
@@ -301,6 +310,17 @@ with tab_train_eval:
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
+            
+            # Thêm mô tả chi tiết cho các tham số của Decision Tree
+            st.markdown("""
+**Chi tiết tham số cho Decision Tree:**
+- **criterion:** Xác định hàm đánh giá độ tinh khiết của nút. Các lựa chọn:
+  - *gini*: Dựa trên chỉ số Gini, phổ biến và hiệu quả.
+  - *entropy*: Dựa trên entropy, đo lường độ hỗn loạn của nút.
+  - *log_loss*: Sử dụng log loss để đánh giá.
+- **max_depth:** Giới hạn độ sâu của cây, giúp ngăn chặn việc cây trở nên quá phức tạp (overfitting).
+- **min_samples_split:** Số mẫu tối thiểu cần có để phân chia một nút, giúp kiểm soát kích thước của các nút và hạn chế overfitting.
+            """, unsafe_allow_html=True)
         else:
             st.subheader("Tham số cho SVM")
             col_C, col_C_tooltip = st.columns([0.9, 0.9])
@@ -352,6 +372,19 @@ with tab_train_eval:
                             </span>
                         </div>
                         """, unsafe_allow_html=True)
+            
+            # Thêm mô tả chi tiết cho các tham số của SVM
+            st.markdown("""
+**Chi tiết tham số cho SVM:**
+- **C (Regularization parameter):** Điều chỉnh mức phạt cho lỗi. Giá trị cao sẽ cố gắng phân chia dữ liệu chính xác hơn nhưng dễ gây overfitting; giá trị thấp giúp tạo biên phân cách rộng.
+- **kernel:** Hàm nhân dùng để chuyển đổi dữ liệu sang không gian có thể phân chia tuyến tính. Các lựa chọn:
+  - *linear*: Hàm nhân tuyến tính.
+  - *rbf*: Hàm nhân Radial Basis Function, hiệu quả với dữ liệu phi tuyến.
+  - *poly*: Hàm nhân đa thức, cho phép mô hình hóa các quan hệ phi tuyến.
+  - *sigmoid*: Hàm nhân sigmoid, tương tự như hàm kích hoạt trong mạng nơ-ron.
+- **gamma:** Hệ số của kernel, xác định mức độ ảnh hưởng của từng điểm dữ liệu. Mặc định là 'scale'.
+- **degree (cho kernel poly):** Độ bậc của hàm đa thức khi sử dụng kernel poly, quyết định độ phức tạp của mối quan hệ phi tuyến.
+            """, unsafe_allow_html=True)
         
         if st.button("Huấn luyện mô hình"):
             with st.spinner("Đang huấn luyện mô hình..."):
