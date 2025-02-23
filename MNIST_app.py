@@ -144,7 +144,7 @@ with tab_preprocess:
                         st.success("Đã chuẩn hoá dữ liệu!")
             with col_norm_tip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-left:-830px;">
+                    <div class="tooltip" style="margin-left:-860px;">
                         <span>?</span>
                         <span class="tooltiptext">
                             Chia giá trị pixel cho 255 để chuyển từ [0, 255] về [0, 1], giúp chuẩn hóa dữ liệu đầu vào cho mô hình.
@@ -166,7 +166,7 @@ with tab_preprocess:
                         st.success("Đã thực hiện Standardization!")
             with col_std_tip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-left:20px;">
+                    <div class="tooltip" style="margin-left:-860px;">
                         <span>?</span>
                         <span class="tooltiptext">
                             Chuyển dữ liệu sao cho trung bình = 0 và độ lệch chuẩn = 1, giúp cho quá trình huấn luyện mô hình hiệu quả hơn.
@@ -188,7 +188,7 @@ with tab_preprocess:
                         st.success("Đã điền giá trị missing!")
             with col_imp_tip:
                 st.markdown("""
-                    <div class="tooltip" style="margin-left:20px;">
+                    <div class="tooltip" style="margin-left:-860px;">
                         <span>?</span>
                         <span class="tooltiptext">
                             Thay thế các giá trị thiếu trong dữ liệu bằng trung vị của từng cột, giúp tránh lỗi khi huấn luyện.
