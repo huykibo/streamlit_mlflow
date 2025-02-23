@@ -79,7 +79,7 @@ with tab_info:
     st.header("Thông tin Ứng dụng")
     st.markdown("""
 **Giới thiệu ứng dụng:**
-Ứng dụng Phân loại Chữ số MNIST mô phỏng quy trình của một dự án Machine Learning.  
+Ứng dụng Phân loại Chữ số MNIST mô phỏng quy trình của dự án Machine Learning.  
 Ứng dụng được chia thành các phần chính sau:
 
 - **Tải dữ liệu:**  
@@ -299,7 +299,7 @@ with tab_train_eval:
             st.markdown("""
                 <div class="tooltip">
                     <span>?</span>
-                    <span class="tooltiptext" style="margin-left:20px;">
+                    <span class="tooltiptext" style="margin-left:20px;" mstyle=" margin-top=20px">
                         <strong>Decision Tree:</strong> Phân lớp dữ liệu theo cấu trúc cây.<br>
                         <strong>SVM:</strong> Tìm biên phân chia tối ưu dựa trên siêu phẳng.
                     </span>
