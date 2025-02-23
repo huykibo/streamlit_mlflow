@@ -79,7 +79,7 @@ with tab_info:
     st.header("Thông tin Ứng dụng")
     st.markdown("""
 **Giới thiệu ứng dụng:**
-Ứng dụng **Phân loại Chữ số MNIST với MLflow Tracking trên DagsHub** mô phỏng quy trình của một dự án Machine Learning.  
+Ứng dụng **Phân loại Chữ số MNIST mô phỏng quy trình của một dự án Machine Learning.  
 Ứng dụng được chia thành các phần chính sau:
 
 - **Tải dữ liệu:**  
@@ -118,14 +118,6 @@ with tab_info:
 with tab_load:
     st.header("Tải Dữ liệu")
     
-    # Lưu ý về định dạng dữ liệu cần tải lên
-    st.markdown("""
-    **Lưu ý:**  
-    - Ứng dụng chỉ sử dụng dữ liệu ảnh dạng **28x28 pixel (grayscale)**  
-    - Dữ liệu phải có cột **'label'** chứa nhãn (số từ 0 đến 9)  
-    Nếu dữ liệu của bạn không theo định dạng này, vui lòng sử dụng dữ liệu MNIST từ OpenML.
-    """)
-    
     st.markdown("""
         <div class="tooltip">
             <span style="font-weight:bold;">OpenML?</span>
@@ -156,6 +148,17 @@ with tab_load:
                     st.session_state['data'] = (X, y)
                 else:
                     st.error("File cần có cột 'label'.")
+    
+    # Khung lưu ý đặt phía dưới cùng của tab
+    st.markdown("""
+    <div style="border: 2px solid red; padding: 10px; border-radius: 5px; margin-top:20px;">
+        <strong>Lưu ý:</strong><br>
+        - Ứng dụng chỉ sử dụng dữ liệu ảnh dạng <strong>28x28 pixel (grayscale)</strong>.<br>
+        - Dữ liệu phải có cột <strong>'label'</strong> chứa nhãn (số từ <strong>0 đến 9</strong>).<br>
+        Nếu dữ liệu của bạn không theo định dạng này, vui lòng sử dụng dữ liệu MNIST từ OpenML.
+    </div>
+    """, unsafe_allow_html=True)
+
 
 
 # ----------------- TAB 3: XỬ LÍ DỮ LIỆU -----------------
@@ -318,7 +321,9 @@ with tab_train_eval:
                             Chọn hàm đánh giá độ tinh khiết:
                             <br>
                             - <strong>gini</strong>: Dựa trên chỉ số Gini, phổ biến và tính toán nhanh.
+                              <br>
                             - <strong>entropy</strong>: Dựa trên entropy, đo lường sự hỗn loạn trong nút.
+                                <br>
                             - <strong>log_loss</strong>: Sử dụng log loss, phù hợp với một số bài toán đặc thù.
                         </span>
                     </div>
@@ -374,9 +379,13 @@ with tab_train_eval:
                         <span>?</span>
                         <span class="tooltiptext" style="margin-left:20px;">
                             Chọn hàm nhân để chuyển đổi dữ liệu:
+                              <br>
                             - <strong>linear</strong>: Tuyến tính.
+                              <br>
                             - <strong>rbf</strong>: Radial Basis Function, hiệu quả với dữ liệu phi tuyến.
+                              <br>
                             - <strong>poly</strong>: Đa thức (yêu cầu chỉ định degree).
+                              <br>
                             - <strong>sigmoid</strong>: Hàm sigmoid, tương tự hàm kích hoạt trong mạng nơ-ron.
                         </span>
                     </div>
