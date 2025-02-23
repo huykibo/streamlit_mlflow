@@ -79,14 +79,39 @@ with tab_info:
     st.header("Thông tin Ứng dụng")
     st.markdown("""
 **Giới thiệu ứng dụng:**
-Ứng dụng **Phân loại Chữ số MNIST với MLflow Tracking trên DagsHub** mô phỏng quy trình của một dự án Machine Learning. 
-Các chức năng chính gồm:
-- **Tải dữ liệu:** Lấy dữ liệu MNIST từ OpenML hoặc upload file CSV (có cột 'label').
-- **Xử lí dữ liệu:** Thực hiện normalization, standardization và missing imputation.
-- **Chia dữ liệu:** Phân chia dữ liệu thành tập huấn luyện, validation, test.
-- **Huấn luyện & Đánh giá:** Huấn luyện mô hình (Decision Tree hoặc SVM) và log các thông số qua MLflow.
-- **Demo dự đoán:** Dự đoán mẫu từ tập Test hoặc upload ảnh mới.
-- **Thông tin Huấn luyện:** Xem thông tin run và mở giao diện MLflow trên DagsHub.
+Ứng dụng **Phân loại Chữ số MNIST với MLflow Tracking trên DagsHub** mô phỏng quy trình của một dự án Machine Learning.  
+Ứng dụng được chia thành các phần chính sau:
+
+- **Tải dữ liệu:**  
+  Lấy dữ liệu MNIST từ OpenML hoặc upload file CSV (file cần có cột 'label').
+
+- **Xử lí dữ liệu:**  
+  Thực hiện 3 bước xử lí dữ liệu:
+  - **Normalization (Chuẩn hoá):**  
+    Chuyển đổi các giá trị pixel (thường từ 0 đến 255) về khoảng [0, 1] bằng cách chia cho 255. Giúp dữ liệu có thang đo đồng nhất, hỗ trợ quá trình huấn luyện mô hình hiệu quả hơn.
+  - **Standardization:**  
+    Điều chỉnh dữ liệu sao cho có trung bình = 0 và độ lệch chuẩn = 1. Phương pháp này giúp giảm sự khác biệt về thang đo giữa các đặc trưng, từ đó cải thiện tốc độ hội tụ và hiệu suất của mô hình.
+  - **Missing Imputation (Điền giá trị Missing):**  
+    Kiểm tra và xử lí các giá trị thiếu trong dữ liệu bằng cách điền vào trung vị của từng cột, đảm bảo dữ liệu đầy đủ, tránh lỗi khi huấn luyện.
+
+- **Chia dữ liệu:**  
+  Phân chia dữ liệu thành tập huấn luyện, validation và test.
+
+- **Huấn luyện/Đánh giá:**  
+  Huấn luyện và đánh giá các mô hình phân lớp, cụ thể:
+  - **Decision Trees:**  
+    Xây dựng cây quyết định với các tham số như *criterion*, *max_depth*, và *min_samples_split* để phân lớp dữ liệu.
+  - **SVM (Support Vector Machines):**  
+    Sử dụng SVM với các tham số như *C*, *kernel*, *gamma* và (nếu dùng kernel poly) *degree* để tìm biên phân chia tối ưu.
+  
+  Sau khi huấn luyện, ứng dụng sẽ hiển thị các chỉ số accuracy trên tập validation và test, cùng với biểu đồ confusion matrix để đánh giá hiệu quả của mô hình.  
+  Các thông số và kết quả được log thông qua MLflow, giúp theo dõi và phân tích hiệu suất mô hình.
+
+- **Demo dự đoán:**  
+  Cho phép người dùng chọn mẫu từ tập Test hoặc upload ảnh mới để dự đoán và kiểm tra kết quả của mô hình.
+
+- **Thông tin Huấn luyện:**  
+  Hiển thị thông tin chi tiết của các run huấn luyện, bao gồm Run ID, các tham số đã sử dụng, và accuracy trên các tập dữ liệu. Người dùng có thể mở giao diện MLflow để xem thêm chi tiết.
 """, unsafe_allow_html=True)
 
 # ----------------- TAB 2: TẢI DỮ LIỆU -----------------
@@ -95,7 +120,7 @@ with tab_load:
     st.markdown("""
         <div class="tooltip">
             <span style="font-weight:bold;">OpenML?</span>
-            <span class="tooltiptext">
+            <span class="tooltiptext" style="margin-left:20px;">
                 OpenML là nền tảng mở cho Machine Learning, cung cấp nhiều dataset chất lượng để huấn luyện mô hình.
             </span>
         </div>
@@ -147,7 +172,9 @@ with tab_preprocess:
                     <div class="tooltip" style="margin-left:-860px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Chia giá trị pixel cho 255 để chuyển từ [0, 255] về [0, 1], giúp chuẩn hóa dữ liệu đầu vào cho mô hình.
+                            Normalization (Chuẩn hoá):  
+                            Chuyển đổi các giá trị pixel (thường nằm trong khoảng từ 0 đến 255) về khoảng [0, 1] bằng cách chia cho 255.  
+                            Giúp dữ liệu có thang đo đồng nhất, hỗ trợ quá trình huấn luyện mô hình hiệu quả hơn.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -169,7 +196,9 @@ with tab_preprocess:
                     <div class="tooltip" style="margin-left:-860px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Chuyển dữ liệu sao cho trung bình = 0 và độ lệch chuẩn = 1, giúp cho quá trình huấn luyện mô hình hiệu quả hơn.
+                            Standardization:  
+                            Điều chỉnh dữ liệu sao cho có trung bình = 0 và độ lệch chuẩn = 1.  
+                            Phương pháp này giúp giảm sự khác biệt về thang đo giữa các đặc trưng, từ đó cải thiện tốc độ hội tụ và hiệu suất của mô hình.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -191,7 +220,9 @@ with tab_preprocess:
                     <div class="tooltip" style="margin-left:-860px;">
                         <span>?</span>
                         <span class="tooltiptext">
-                            Thay thế các giá trị thiếu trong dữ liệu bằng trung vị của từng cột, giúp tránh lỗi khi huấn luyện.
+                            Missing Imputation (Điền giá trị Missing):  
+                            Kiểm tra và xử lí các giá trị thiếu trong dữ liệu bằng cách điền vào trung vị của từng cột.  
+                            Đảm bảo dữ liệu đầy đủ, tránh lỗi khi mô hình huấn luyện.
                         </span>
                     </div>
                     """, unsafe_allow_html=True)
@@ -254,7 +285,7 @@ with tab_train_eval:
             st.markdown("""
                 <div class="tooltip">
                     <span>?</span>
-                    <span class="tooltiptext">
+                    <span class="tooltiptext" style="margin-left:20px;">
                         <strong>Decision Tree:</strong> Phân lớp dữ liệu theo cấu trúc cây.<br>
                         <strong>SVM:</strong> Tìm biên phân chia tối ưu dựa trên siêu phẳng.
                     </span>
@@ -272,7 +303,7 @@ with tab_train_eval:
                 st.markdown("""
                     <div class="tooltip">
                         <span>?</span>
-                        <span class="tooltiptext">
+                        <span class="tooltiptext" style="margin-left:20px;">
                             Chọn hàm đánh giá độ tinh khiết:
                             - <strong>gini</strong>: Dựa trên chỉ số Gini, phổ biến và tính toán nhanh.
                             - <strong>entropy</strong>: Dựa trên entropy, đo lường sự hỗn loạn trong nút.
@@ -288,7 +319,7 @@ with tab_train_eval:
                 st.markdown("""
                     <div class="tooltip">
                         <span>?</span>
-                        <span class="tooltiptext">
+                        <span class="tooltiptext" style="margin-left:20px;">
                             Giới hạn độ sâu của cây để tránh overfitting. Giá trị thấp giúp mô hình đơn giản, cao cho phép mô hình phức tạp hơn.
                         </span>
                     </div>
@@ -301,7 +332,7 @@ with tab_train_eval:
                 st.markdown("""
                     <div class="tooltip">
                         <span>?</span>
-                        <span class="tooltiptext">
+                        <span class="tooltiptext" style="margin-left:20px;">
                             Số mẫu tối thiểu cần thiết để chia tách một nút. Giá trị cao hơn giúp hạn chế overfitting bằng cách yêu cầu nhiều mẫu hơn trước khi chia.
                         </span>
                     </div>
@@ -316,7 +347,7 @@ with tab_train_eval:
                 st.markdown("""
                     <div class="tooltip">
                         <span>?</span>
-                        <span class="tooltiptext">
+                        <span class="tooltiptext" style="margin-left:20px;">
                             Tham số điều chỉnh mức phạt cho lỗi. Giá trị cao: phân chia dữ liệu chặt chẽ (có thể gây overfitting), giá trị thấp: tạo biên phân cách rộng hơn.
                         </span>
                     </div>
@@ -329,7 +360,7 @@ with tab_train_eval:
                 st.markdown("""
                     <div class="tooltip">
                         <span>?</span>
-                        <span class="tooltiptext">
+                        <span class="tooltiptext" style="margin-left:20px;">
                             Chọn hàm nhân để chuyển đổi dữ liệu:
                             - <strong>linear</strong>: Tuyến tính.
                             - <strong>rbf</strong>: Radial Basis Function, hiệu quả với dữ liệu phi tuyến.
@@ -346,7 +377,7 @@ with tab_train_eval:
                 st.markdown("""
                     <div class="tooltip">
                         <span>?</span>
-                        <span class="tooltiptext">
+                        <span class="tooltiptext" style="margin-left:20px;">
                             Hệ số cho kernel, xác định mức độ ảnh hưởng của từng mẫu. Mặc định là 'scale'; có thể điều chỉnh để tối ưu hóa hiệu năng.
                         </span>
                     </div>
@@ -360,7 +391,7 @@ with tab_train_eval:
                     st.markdown("""
                         <div class="tooltip">
                             <span>?</span>
-                            <span class="tooltiptext">
+                            <span class="tooltiptext" style="margin-left:20px;">
                                 Độ bậc của hàm đa thức khi sử dụng kernel poly, xác định độ phức tạp của mối quan hệ phi tuyến.
                             </span>
                         </div>
